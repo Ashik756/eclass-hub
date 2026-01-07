@@ -1,0 +1,227 @@
+// Mock data for the LMS application
+
+export const batches = [
+  {
+    id: "1",
+    name: "HSC Physics 2024",
+    description: "Complete HSC Physics course with live classes and practice tests",
+    teacherId: "1",
+    teacherName: "রফিকুল ইসলাম",
+    subject: "Physics",
+    thumbnail: null,
+    students: ["2"],
+    createdAt: "2024-01-15",
+    inviteCode: "PHY2024",
+  },
+  {
+    id: "2",
+    name: "SSC Math Crash Course",
+    description: "Intensive mathematics preparation for SSC examination",
+    teacherId: "1",
+    teacherName: "রফিকুল ইসলাম",
+    subject: "Mathematics",
+    thumbnail: null,
+    students: ["2"],
+    createdAt: "2024-02-01",
+    inviteCode: "MATH2024",
+  },
+  {
+    id: "3",
+    name: "HSC Chemistry Full Course",
+    description: "Comprehensive chemistry course covering all HSC topics",
+    teacherId: "1",
+    teacherName: "রফিকুল ইসলাম",
+    subject: "Chemistry",
+    thumbnail: null,
+    students: [],
+    createdAt: "2024-02-10",
+    inviteCode: "CHEM2024",
+  },
+];
+
+export const classes = [
+  {
+    id: "1",
+    batchId: "1",
+    title: "Introduction to Mechanics",
+    description: "Understanding the fundamentals of classical mechanics",
+    type: "recorded",
+    videoUrl: "https://www.youtube.com/embed/ZM8ECpBuQYE",
+    duration: "45 mins",
+    order: 1,
+    createdAt: "2024-01-16",
+  },
+  {
+    id: "2",
+    batchId: "1",
+    title: "Newton's Laws of Motion",
+    description: "Deep dive into Newton's three laws with practical examples",
+    type: "recorded",
+    videoUrl: "https://www.youtube.com/embed/kKKM8Y-u7ds",
+    duration: "60 mins",
+    order: 2,
+    createdAt: "2024-01-18",
+  },
+  {
+    id: "3",
+    batchId: "1",
+    title: "Live: Problem Solving Session",
+    description: "Interactive problem-solving session for mechanics",
+    type: "live",
+    liveUrl: "https://meet.jit.si/shikkhok-physics-live",
+    scheduledAt: "2024-12-20T18:00:00",
+    duration: "90 mins",
+    order: 3,
+    createdAt: "2024-01-19",
+    isLive: true,
+  },
+  {
+    id: "4",
+    batchId: "2",
+    title: "Algebra Fundamentals",
+    description: "Review of algebraic expressions and equations",
+    type: "recorded",
+    videoUrl: "https://www.youtube.com/embed/NybHckSEQBI",
+    duration: "50 mins",
+    order: 1,
+    createdAt: "2024-02-02",
+  },
+  {
+    id: "5",
+    batchId: "2",
+    title: "Live: Trigonometry Workshop",
+    description: "Master trigonometry with hands-on practice",
+    type: "live",
+    liveUrl: "https://meet.jit.si/shikkhok-math-live",
+    scheduledAt: "2024-12-21T19:00:00",
+    duration: "120 mins",
+    order: 2,
+    createdAt: "2024-02-03",
+    isLive: false,
+  },
+];
+
+export const notes = [
+  {
+    id: "1",
+    classId: "1",
+    title: "Mechanics Formula Sheet",
+    content: "This document contains all important formulas for mechanics including:\n\n• Kinematic equations\n• Newton's laws formulas\n• Work, energy, and power equations\n• Momentum and collision formulas",
+    pdfUrl: null,
+    createdAt: "2024-01-16",
+  },
+  {
+    id: "2",
+    classId: "2",
+    title: "Newton's Laws Summary",
+    content: "Complete summary of Newton's three laws with real-world examples and practice problems.",
+    pdfUrl: "/sample.pdf",
+    createdAt: "2024-01-18",
+  },
+  {
+    id: "3",
+    classId: "4",
+    title: "Algebra Cheat Sheet",
+    content: "Quick reference guide for algebraic identities and equation solving techniques.",
+    pdfUrl: null,
+    createdAt: "2024-02-02",
+  },
+];
+
+export const tests = [
+  {
+    id: "1",
+    batchId: "1",
+    title: "Mechanics Unit Test",
+    description: "Test your understanding of mechanics concepts",
+    duration: 30,
+    totalMarks: 20,
+    questions: [
+      {
+        id: "q1",
+        question: "What is the SI unit of force?",
+        options: ["Joule", "Newton", "Watt", "Pascal"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q2",
+        question: "According to Newton's first law, an object at rest will:",
+        options: [
+          "Always remain at rest",
+          "Start moving slowly",
+          "Remain at rest unless acted upon by a force",
+          "Move in a circular path",
+        ],
+        correctAnswer: 2,
+      },
+      {
+        id: "q3",
+        question: "The acceleration due to gravity on Earth is approximately:",
+        options: ["5 m/s²", "9.8 m/s²", "15 m/s²", "20 m/s²"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q4",
+        question: "Which of the following is a vector quantity?",
+        options: ["Mass", "Temperature", "Velocity", "Time"],
+        correctAnswer: 2,
+      },
+    ],
+    createdAt: "2024-01-20",
+  },
+  {
+    id: "2",
+    batchId: "2",
+    title: "Algebra Quiz",
+    description: "Quick quiz on algebraic expressions",
+    duration: 20,
+    totalMarks: 10,
+    questions: [
+      {
+        id: "q1",
+        question: "Solve: 2x + 5 = 15",
+        options: ["x = 3", "x = 5", "x = 7", "x = 10"],
+        correctAnswer: 1,
+      },
+      {
+        id: "q2",
+        question: "What is (a + b)²?",
+        options: ["a² + b²", "a² + 2ab + b²", "a² - 2ab + b²", "2a² + 2b²"],
+        correctAnswer: 1,
+      },
+    ],
+    createdAt: "2024-02-05",
+  },
+];
+
+export const testResults = [
+  {
+    id: "1",
+    testId: "1",
+    studentId: "2",
+    answers: [1, 2, 1, 2],
+    score: 20,
+    submittedAt: "2024-01-21T14:30:00",
+  },
+];
+
+export const liveComments = [
+  {
+    id: "1",
+    classId: "3",
+    userId: "2",
+    userName: "আবদুল করিম",
+    userRole: "student",
+    message: "স্যার, এই প্রবলেমটা আরেকবার বুঝিয়ে দিন প্লিজ",
+    timestamp: "2024-01-19T18:15:00",
+  },
+  {
+    id: "2",
+    classId: "3",
+    userId: "1",
+    userName: "রফিকুল ইসলাম",
+    userRole: "teacher",
+    message: "অবশ্যই! আবার দেখাচ্ছি সবাইকে",
+    timestamp: "2024-01-19T18:16:00",
+  },
+];
