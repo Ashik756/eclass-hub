@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { DashboardLayout } from "../components/DashboardLayout";
 import { BatchCard } from "../components/BatchCard";
-import { batches } from "../data/mockData";
-import { useAuth } from "../contexts/AuthContext";
+import { useBatches } from "@/hooks/useBatches";
 import { Link } from "react-router-dom";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Loader2 } from "lucide-react";
 
 export default function TeacherBatches() {
-  const { user } = useAuth();
+  const { batches, loading } = useBatches();
   const [search, setSearch] = useState("");
 
-  const myBatches = batches.filter(
-    (b) =>
-      b.teacherId === user?.id &&
-      b.name.toLowerCase().includes(search.toLowerCase())
+  const filteredBatches = batches.filter((b) =>
+    b.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -51,9 +48,13 @@ export default function TeacherBatches() {
         </div>
 
         {/* Batches Grid */}
-        {myBatches.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : filteredBatches.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myBatches.map((batch) => (
+            {filteredBatches.map((batch) => (
               <BatchCard key={batch.id} batch={batch} isTeacher />
             ))}
           </div>

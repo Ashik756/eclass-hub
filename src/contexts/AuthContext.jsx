@@ -1,104 +1,128 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthContext = createContext(null);
 
-// Mock users data
-const MOCK_USERS = [
-  {
-    id: "1",
-    email: "teacher@shikkhok.com",
-    password: "teacher123",
-    name: "রফিকুল ইসলাম",
-    role: "teacher",
-    avatar: null,
-  },
-  {
-    id: "2",
-    email: "student@shikkhok.com",
-    password: "student123",
-    name: "আবদুল করিম",
-    role: "student",
-    avatar: null,
-  },
-];
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // Check for stored session
-    const storedUser = localStorage.getItem("lms_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, []);
-
-  const login = async (email, password) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const foundUser = MOCK_USERS.find(
-      (u) => u.email === email && u.password === password
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Fetch profile on auth change
+        if (session?.user) {
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
+      }
     );
 
-    if (foundUser) {
-      const userSession = {
-        id: foundUser.id,
-        email: foundUser.email,
-        name: foundUser.name,
-        role: foundUser.role,
-        avatar: foundUser.avatar,
-      };
-      setUser(userSession);
-      localStorage.setItem("lms_user", JSON.stringify(userSession));
-      return { success: true, user: userSession };
-    }
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
 
-    return { success: false, error: "Invalid email or password" };
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   };
 
   const register = async (name, email, password, role) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name,
+            role,
+          },
+        },
+      });
 
-    // Check if user exists
-    const existingUser = MOCK_USERS.find((u) => u.email === email);
-    if (existingUser) {
-      return { success: false, error: "Email already registered" };
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, user: data.user };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
-
-    // Create new user
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      name,
-      role,
-      avatar: null,
-    };
-
-    MOCK_USERS.push({ ...newUser, password });
-
-    setUser(newUser);
-    localStorage.setItem("lms_user", JSON.stringify(newUser));
-    return { success: true, user: newUser };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("lms_user");
+    setProfile(null);
+    setSession(null);
   };
 
   const value = {
     user,
+    profile,
+    session,
     loading,
     login,
     register,
     logout,
-    isAuthenticated: !!user,
-    isTeacher: user?.role === "teacher",
-    isStudent: user?.role === "student",
+    isAuthenticated: !!user && !!profile,
+    isTeacher: profile?.role === "teacher",
+    isStudent: profile?.role === "student",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

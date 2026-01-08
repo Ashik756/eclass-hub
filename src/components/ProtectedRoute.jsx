@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ProtectedRoute({ children, allowedRoles = [] }) {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { profile, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -20,9 +20,9 @@ export function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+  if (allowedRoles.length > 0 && !allowedRoles.includes(profile?.role)) {
     // Redirect to appropriate dashboard based on role
-    const redirectPath = user?.role === "teacher" ? "/teacher" : "/student";
+    const redirectPath = profile?.role === "teacher" ? "/teacher" : "/student";
     return <Navigate to={redirectPath} replace />;
   }
 
