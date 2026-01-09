@@ -53,10 +53,21 @@ export function useBatches() {
     fetchBatches();
   }, [fetchBatches]);
 
+  // Generate cryptographically secure invite code
+  const generateSecureInviteCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude similar chars (0, O, 1, I)
+    let code = '';
+    const array = new Uint8Array(8);
+    crypto.getRandomValues(array);
+    for (let i = 0; i < 8; i++) {
+      code += chars[array[i] % chars.length];
+    }
+    return code;
+  };
+
   const createBatch = async (batchData) => {
     try {
-      const inviteCode = batchData.name.substring(0, 4).toUpperCase() + 
-        Date.now().toString().slice(-6);
+      const inviteCode = generateSecureInviteCode();
 
       const { data, error } = await supabase
         .from("batches")
