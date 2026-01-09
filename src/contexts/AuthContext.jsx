@@ -1,3 +1,4 @@
+// Auth Context for localStorage-based authentication
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
