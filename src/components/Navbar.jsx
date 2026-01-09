@@ -1,139 +1,129 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Menu, X, GraduationCap, ChevronDown } from "lucide-react";
+import { GraduationCap, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user, logout, isTeacher } = useAuth();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/features", label: "Features" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/about", label: "About" },
-  ];
+  const navLinks = [{ to: "/", label: "Home" }];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
-      <div className="section-container">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
+              <GraduationCap className="w-6 h-6 text-white" />
             </div>
-            <span className="font-display font-bold text-xl text-foreground">
-              শিক্ষক<span className="text-primary">.io</span>
-            </span>
+            <span className="text-xl font-bold text-gray-900">eClass Hub</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
-                key={link.href}
-                to={link.href}
+                key={link.to}
+                to={link.to}
                 className={`text-sm font-medium transition-colors ${
-                  isActive(link.href)
+                  isActive(link.to)
                     ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-          </div>
 
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
                 <Link
                   to={isTeacher ? "/teacher" : "/student"}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900"
                 >
                   Dashboard
                 </Link>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">
-                      {user?.name?.charAt(0)}
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium">{user?.name}</span>
-                </div>
+                <span className="text-sm text-gray-500">
+                  {user.name} ({user.role})
+                </span>
                 <button
                   onClick={logout}
-                  className="text-sm font-medium text-destructive hover:text-destructive/80 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <>
+              <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className={`text-sm font-medium transition-colors ${
+                    isActive("/login")
+                      ? "text-primary"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                 >
-                  Get Started
+                  Register
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-foreground"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-2">
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-200">
+            <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
-                  key={link.href}
-                  to={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(link.href)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary"
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`text-sm font-medium ${
+                    isActive(link.to) ? "text-primary" : "text-gray-600"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-border my-2"></div>
               {isAuthenticated ? (
                 <>
                   <Link
                     to={isTeacher ? "/teacher" : "/student"}
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-gray-600"
                   >
                     Dashboard
                   </Link>
                   <button
                     onClick={() => {
                       logout();
-                      setIsOpen(false);
+                      setMobileMenuOpen(false);
                     }}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 text-left"
+                    className="text-sm font-medium text-gray-600 text-left"
                   >
                     Logout
                   </button>
@@ -142,17 +132,17 @@ export function Navbar() {
                 <>
                   <Link
                     to="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-gray-600"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    onClick={() => setIsOpen(false)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-medium text-primary"
                   >
-                    Get Started
+                    Register
                   </Link>
                 </>
               )}

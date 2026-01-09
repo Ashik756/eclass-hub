@@ -1,188 +1,175 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { GraduationCap, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Navbar } from "../components/Navbar";
+import { GraduationCap, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const { login, isAuthenticated, user } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "student",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || null;
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    const redirectPath = user?.role === "teacher" ? "/teacher" : "/student";
+    navigate(redirectPath, { replace: true });
+    return null;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter both email and password");
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
       setLoading(false);
       return;
     }
 
-    const result = await login(email, password);
-
-    if (result.success) {
-      const redirectPath =
-        from || (result.user.role === "teacher" ? "/teacher" : "/student");
-      navigate(redirectPath, { replace: true });
-    } else {
-      setError(result.error);
+    try {
+      const result = login(formData.email, formData.password, formData.role);
+      if (result.success) {
+        const redirectPath =
+          formData.role === "teacher" ? "/teacher" : "/student";
+        navigate(redirectPath);
+      } else {
+        setError("Login failed");
+      }
+    } catch (err) {
+      setError("An error occurred");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+
+      <div className="flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <GraduationCap className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
+              <p className="text-gray-500 mt-2">Login to your account</p>
             </div>
-            <span className="font-display font-bold text-xl text-foreground">
-              শিক্ষক<span className="text-primary">.io</span>
-            </span>
-          </Link>
 
-          <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-            Welcome back!
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Enter your credentials to access your account
-          </p>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
 
-          {/* Demo Credentials */}
-          <div className="p-4 mb-6 rounded-xl bg-primary/5 border border-primary/20">
-            <p className="text-sm font-medium text-foreground mb-2">
-              Demo Credentials:
-            </p>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>
-                <strong>Teacher:</strong> teacher@shikkhok.com / teacher123
-              </p>
-              <p>
-                <strong>Student:</strong> student@shikkhok.com / student123
-              </p>
-            </div>
-          </div>
-
-          {error && (
-            <div className="flex items-center gap-2 p-4 mb-6 rounded-xl bg-destructive/10 text-destructive">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="input-field pl-12"
-                  required
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+                  placeholder="Enter your email"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="input-field pl-12 pr-12"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors pr-12"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                />
-                <span className="text-sm text-muted-foreground">
-                  Remember me
-                </span>
-              </label>
-              <a
-                href="#"
-                className="text-sm text-primary hover:text-primary/80"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Login as
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, role: "student" })
+                    }
+                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${
+                      formData.role === "student"
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, role: "teacher" })
+                    }
+                    className={`px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${
+                      formData.role === "teacher"
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    Teacher
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Forgot password?
-              </a>
-            </div>
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </form>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-muted-foreground">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-primary font-medium hover:text-primary/80"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
-
-      {/* Right Side - Decoration */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-sidebar to-sidebar/90 items-center justify-center p-12">
-        <div className="max-w-lg text-center text-sidebar-foreground">
-          <div className="w-24 h-24 mx-auto mb-8 rounded-2xl bg-sidebar-accent flex items-center justify-center">
-            <GraduationCap className="w-12 h-12 text-sidebar-primary" />
+            <p className="text-center text-sm text-gray-500 mt-6">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="text-primary font-medium hover:underline"
+              >
+                Register
+              </Link>
+            </p>
           </div>
-          <h2 className="text-3xl font-display font-bold mb-4">
-            Start Your Learning Journey
-          </h2>
-          <p className="text-sidebar-foreground/70">
-            Join thousands of students and teachers who are transforming
-            education in Bangladesh. Live classes, interactive content, and
-            personalized learning - all in one place.
-          </p>
         </div>
       </div>
     </div>
