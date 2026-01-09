@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Navbar } from "../components/Navbar";
@@ -6,7 +6,7 @@ import { GraduationCap, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register, isAuthenticated, user } = useAuth();
+  const { register, isAuthenticated, profile, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,58 +16,60 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in
-  if (isAuthenticated) {
-    const redirectPath = user?.role === "teacher" ? "/teacher" : "/student";
-    navigate(redirectPath, { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && isAuthenticated && profile) {
+      const redirectPath = profile.role === "teacher" ? "/teacher" : "/student";
+      navigate(redirectPath, { replace: true });
+    }
+  }, [loading, isAuthenticated, profile, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    setIsSubmitting(true);
 
     if (!formData.name || !formData.email || !formData.password) {
       setError("Please fill in all fields");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
-    try {
-      const result = register(
-        formData.name,
-        formData.email,
-        formData.password,
-        formData.role
-      );
-      if (result.success) {
-        const redirectPath =
-          formData.role === "teacher" ? "/teacher" : "/student";
-        navigate(redirectPath);
-      } else {
-        setError("Registration failed");
-      }
-    } catch (err) {
-      setError("An error occurred");
-    } finally {
-      setLoading(false);
+    const result = await register(
+      formData.name,
+      formData.email,
+      formData.password,
+      formData.role
+    );
+    
+    if (!result.success) {
+      setError(result.error || "Registration failed");
+      setIsSubmitting(false);
     }
+    // Redirect will happen via useEffect when auth state changes
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -207,10 +209,10 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {isSubmitting ? "Creating account..." : "Create Account"}
               </button>
             </form>
 
