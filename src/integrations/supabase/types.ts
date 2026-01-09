@@ -380,7 +380,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      submit_test_answers: {
+        Args: { student_answers: Json; test_uuid: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

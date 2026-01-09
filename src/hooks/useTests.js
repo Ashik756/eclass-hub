@@ -110,46 +110,29 @@ export function useTests(batchId) {
 
   const submitTest = async (testId, answers) => {
     try {
-      // Fetch questions to calculate score
-      const { data: questions } = await supabase
-        .from("test_questions")
-        .select("id, correct_answer")
-        .eq("test_id", testId)
-        .order("order_index");
-
-      const { data: test } = await supabase
-        .from("tests")
-        .select("total_marks")
-        .eq("id", testId)
-        .single();
-
-      // Calculate score
-      let correctCount = 0;
-      questions.forEach((q, index) => {
-        if (answers[index] === q.correct_answer) {
-          correctCount++;
-        }
+      // Use secure server-side function to calculate score
+      // This prevents students from seeing correct answers in client
+      const answersObj = {};
+      answers.forEach((answer, index) => {
+        answersObj[index] = answer;
       });
 
-      const score = Math.round(
-        (correctCount / questions.length) * test.total_marks
-      );
-
-      // Submit result
-      const { data: result, error } = await supabase
-        .from("test_results")
-        .insert({
-          test_id: testId,
-          student_id: profile.id,
-          answers,
-          score,
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('submit_test_answers', {
+        test_uuid: testId,
+        student_answers: answersObj
+      });
 
       if (error) throw error;
 
-      return { success: true, result };
+      return { 
+        success: true, 
+        result: {
+          id: data.result_id,
+          score: data.score,
+          correct_count: data.correct_count,
+          total_questions: data.total_questions
+        }
+      };
     } catch (err) {
       console.error("Error submitting test:", err);
       return { success: false, error: err.message };
