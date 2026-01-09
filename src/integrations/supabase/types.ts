@@ -380,6 +380,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_batch_member_profiles: {
+        Args: { batch_uuid: string }
+        Returns: {
+          avatar_url: string
+          id: string
+          name: string
+          role: string
+        }[]
+      }
+      get_user_display_info: {
+        Args: { user_uuid: string }
+        Returns: {
+          avatar_url: string
+          id: string
+          name: string
+          role: string
+        }[]
+      }
       submit_test_answers: {
         Args: { student_answers: Json; test_uuid: string }
         Returns: Json
